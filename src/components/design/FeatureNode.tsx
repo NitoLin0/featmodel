@@ -28,7 +28,6 @@ export function FeatureNode({ id, data, selected }: NodeProps<FeatureNodeData>) 
 
   const nodes = useStore((state: any) => state.nodes) || [];
   const edges = useStore((state: any) => state.edges) || [];
-  const setEdges = useStore((state: any) => state.setEdges);
   const mode = useStore((state: any) => state.mode) || "edit";
 
   const handleDoubleClick = () => {
@@ -134,7 +133,7 @@ export function FeatureNode({ id, data, selected }: NodeProps<FeatureNodeData>) 
                 return (
                   <ContextMenuItem
                     key={edge.id}
-                    onClick={() => setEdges(edges.filter((e: any) => e.id !== edge.id))}
+                    onClick={() => data.onEdgeDelete?.(edge.id)}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     {edge.label} ({edge.source === id ? 'a' : 'de'} {otherNode?.data.label})

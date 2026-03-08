@@ -113,6 +113,7 @@ export default function DesignPage() {
             return updatedNodes;
           });
         },
+        onEdgeDelete: handleEdgeDelete,
       },
     };
     setNodes((nds: Node[]) => {
@@ -144,10 +145,21 @@ export default function DesignPage() {
     console.log("Cargando modelo...");
   };
 
-  const handleClear = () => {
+const handleClear = () => {
     setNodes([...initialNodes]);
     setEdges([...initialEdges]);
   };
+
+  const handleEdgeDelete = useCallback(
+    (edgeId: string) => {
+      setEdges((eds: Edge[]) => {
+        const updatedEdges = eds.filter((e: Edge) => e.id !== edgeId);
+        console.log("Edge deleted:", edgeId, "Updated edges:", updatedEdges);
+        return updatedEdges;
+      });
+    },
+    [setEdges]
+  );
 
   return (
     <SidebarProvider>
