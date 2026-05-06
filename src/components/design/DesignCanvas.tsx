@@ -11,7 +11,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useTheme } from "next-themes";
-import { connectionTypes, labels } from "./constants";
+import { connectionTypes, complejidadLabels, tipoLabels } from "./constants";
 import { Zap } from "lucide-react";
 
 interface DesignCanvasProps {
@@ -23,7 +23,8 @@ interface DesignCanvasProps {
   onConnect: OnConnect;
   nodeTypes: any;
   selectedConnection: string | null;
-  selectedLabel: string | null;
+  selectedComplejidad: string | null;
+  selectedTipo: string | null;
 }
 
 export function DesignCanvas({
@@ -35,7 +36,8 @@ export function DesignCanvas({
   onConnect,
   nodeTypes,
   selectedConnection,
-  selectedLabel,
+  selectedComplejidad,
+  selectedTipo,
 }: DesignCanvasProps) {
   const { theme } = useTheme();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -44,8 +46,12 @@ export function DesignCanvas({
     ? connectionTypes.find((c) => c.id === selectedConnection)
     : null;
 
-  const currentLabel = selectedLabel
-    ? labels.find((l) => l.id === selectedLabel)
+  const currentComplejidad = selectedComplejidad
+    ? complejidadLabels.find((l) => l.id === selectedComplejidad)
+    : null;
+
+  const currentTipo = selectedTipo
+    ? tipoLabels.find((l) => l.id === selectedTipo)
     : null;
 
   return (
@@ -104,23 +110,44 @@ export function DesignCanvas({
               </div>
 
               <div className="space-y-1">
-                <p className="text-xs font-medium text-foreground">Etiqueta Activa:</p>
-                {currentLabel ? (
+                <p className="text-xs font-medium text-foreground">Etiqueta Complejidad Activa:</p>
+                {currentComplejidad ? (
                   <div className="flex items-center gap-2 px-2 py-1 rounded" style={{
-                    backgroundColor: `${currentLabel.color}20`,
-                    border: `1px solid ${currentLabel.color}`,
+                    backgroundColor: `${currentComplejidad.color}20`,
+                    border: `1px solid ${currentComplejidad.color}`,
                   }}>
                     <div
                       className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: currentLabel.color }}
+                      style={{ backgroundColor: currentComplejidad.color }}
                     />
-                    <span className="text-xs font-medium" style={{ color: currentLabel.color }}>
-                      {currentLabel.label}
+                    <span className="text-xs font-medium" style={{ color: currentComplejidad.color }}>
+                      {currentComplejidad.label}
                     </span>
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">
-                    Selecciona una etiqueta
+                    Selecciona complejidad
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-foreground">Etiqueta Tipo Activa:</p>
+                {currentTipo ? (
+                  <div className="flex items-center gap-2 px-2 py-1 rounded" style={{
+                    backgroundColor: `${currentTipo.color}20`,
+                    border: `1px solid ${currentTipo.color}`,
+                  }}>
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: currentTipo.color }}
+                    />
+                    <span className="text-xs font-medium" style={{ color: currentTipo.color }}>
+                      {currentTipo.label}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    Selecciona tipo
                   </p>
                 )}
               </div>

@@ -10,7 +10,8 @@ import {
   DesignSidebar,
   VersionDialog,
   connectionTypes,
-  labels,
+  complejidadLabels,
+  tipoLabels,
 } from "@/components/design";
 import { Node, Edge, useNodesState, useEdgesState, addEdge } from "reactflow";
 import { generateNodeId, getRandomPosition, incrementVersion } from "@/lib/helpers";
@@ -31,7 +32,8 @@ export default function DesignPage() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
-  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [selectedComplejidad, setSelectedComplejidad] = useState<string | null>(null);
+  const [selectedTipo, setSelectedTipo] = useState<string | null>(null);
   const [modelName, setModelName] = useState(
     modelId ? `Modelo ${modelId}` : "Modelo sin nombre"
   );
@@ -55,6 +57,10 @@ export default function DesignPage() {
       const connectionType = selectedConnection
         ? connectionTypes.find((c) => c.id === selectedConnection)
         : connectionTypes[0];
+      const isLateralOnly = ['requires', 'include'].includes(selectedConnection || '');
+      if (isLateralOnly && (params.sourceHandle === 'top' || params.sourceHandle === 'bottom' || params.targetHandle === 'left' || params.targetHandle === 'right')) {
+        // Skip or warn for non-lateral, but for now allow - validate in future
+      }
       setEdges((eds: Edge[]) => {
         const newEdges = addEdge(
           {
@@ -77,6 +83,27 @@ export default function DesignPage() {
     [selectedConnection, setEdges]
   );
 
+  const handleEdgeUpdate = useCallback((edgeId: string, newConnId: string) => {
+    const connType = connectionTypes.find((c) => c.id === newConnId);
+    if (connType) {
+      setEdges((eds) =>
+        eds.map((e) =>
+          e.id === edgeId
+            ? {
+                ...e,
+                label: connType.label,
+                style: {
+                  stroke: connType.color,
+                  strokeDasharray: connType.style === "dashed" ? "5,5" : "none",
+                  strokeWidth: 2,
+                },
+              }
+            : e
+        )
+      );
+    }
+  }, [setEdges]);
+
   const addNode = useCallback(() => {
     const newNode: Node = {
       id: generateNodeId(nodes.length),
@@ -84,9 +111,14 @@ export default function DesignPage() {
       position: getRandomPosition(),
       data: {
         label: `Característica ${nodes.length + 1}`,
-        tag: selectedLabel
-          ? labels.find((l) => l.id === selectedLabel)?.label
-          : undefined,
+        tags: {
+          complejidad: selectedComplejidad
+            ? complejidadLabels.find((l) => l.id === selectedComplejidad)?.label
+            : undefined,
+          tipo: selectedTipo
+            ? tipoLabels.find((l) => l.id === selectedTipo)?.label
+            : undefined,
+        },
         edges: edges,
         nodeId: undefined,
         onDelete: () => {
@@ -100,18 +132,30 @@ export default function DesignPage() {
             )
           );
         },
-        onTagChange: (tag: string) => {
+        onTagChange: (category: 'complejidad' | 'tipo', value: string) => {
           setNodes((nds) =>
-            nds.map((n: Node) =>
-              n.id === newNode.id ? { ...n, data: { ...n.data, tag } } : n
-            )
+            nds.map((n: Node) => {
+              if (n.id === newNode.id && n.data.tags) {
+                return {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    tags: {
+                      ...n.data.tags,
+                      [category]: value,
+                    },
+                  },
+                };
+              }
+              return n;
+            })
           );
         },
         onEdgeDelete: handleEdgeDelete,
       },
     };
     setNodes((nds: Node[]) => nds.concat(newNode));
-  }, [nodes.length, edges, selectedLabel, setNodes, setEdges]);
+  }, [nodes.length, edges, complejidadLabels, tipoLabels, setNodes, setEdges]);
 
   const handleNewModel = () => {
     if (newModelName.trim()) {
@@ -146,13 +190,22 @@ export default function DesignPage() {
     [setEdges]
   );
 
+  const getNodeLabel = useCallback((nodeId: string) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    return node?.data.label || nodeId;
+  }, [nodes]);
+
   // Update nodes with edges data
   const nodesWithEdges = nodes.map((node) => ({
     ...node,
-    data: {
-      ...node.data,
-      edges: edges,
-    },
+      data: {
+        ...node.data,
+        edges: edges,
+        selectedConnection,
+        getNodeLabel,
+        onEdgeUpdate: handleEdgeUpdate,
+        onEdgeDelete: handleEdgeDelete,
+      },
   }));
 
   return (
@@ -164,8 +217,10 @@ export default function DesignPage() {
             setSelectedTool={setSelectedTool}
             selectedConnection={selectedConnection}
             setSelectedConnection={setSelectedConnection}
-            selectedLabel={selectedLabel}
-            setSelectedLabel={setSelectedLabel}
+            selectedComplejidad={selectedComplejidad}
+            setSelectedComplejidad={setSelectedComplejidad}
+            selectedTipo={selectedTipo}
+            setSelectedTipo={setSelectedTipo}
             addNode={addNode}
           />
         )}
@@ -198,7 +253,8 @@ export default function DesignPage() {
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             selectedConnection={selectedConnection}
-            selectedLabel={selectedLabel}
+            selectedComplejidad={selectedComplejidad}
+            selectedTipo={selectedTipo}
           />
         </div>
         <VersionDialog

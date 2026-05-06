@@ -2,10 +2,16 @@ import { Node, Edge } from "reactflow";
 
 export interface FeatureNodeData {
   label: string;
-  tag?: string;
+  tags?: {
+    complejidad?: string;
+    tipo?: string;
+  };
+  selectedConnection?: string;
   onDelete?: () => void;
-  onTagChange?: (tag: string) => void;
+  onTagChange?: (category: 'complejidad' | 'tipo', value: string) => void;
   onEdgeDelete?: (edgeId: string) => void;
+  onEdgeUpdate?: (edgeId: string, newConnectionId: string) => void;
+  getNodeLabel?: (nodeId: string) => string;
   edges?: Edge[];
   nodeId?: string;
 }

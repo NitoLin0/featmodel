@@ -170,7 +170,7 @@ export default function GestionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -193,10 +193,10 @@ export default function GestionPage() {
         </div>
 
         {/* Búsqueda */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
+        <Card className="mb-4">
+          <CardContent>
             <div className="relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 top-2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nombre, email, departamento o rol..."
                 value={searchQuery}
@@ -216,7 +216,7 @@ export default function GestionPage() {
           </CardHeader>
           <CardContent>
             {paginatedUsers.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-4">
                 <p className="text-muted-foreground mb-4">
                   {searchQuery
                     ? "No se encontraron usuarios que coincidan con tu búsqueda"
@@ -237,12 +237,12 @@ export default function GestionPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-semibold">Nombre</th>
-                        <th className="text-left py-3 px-4 font-semibold">Email</th>
-                        <th className="text-left py-3 px-4 font-semibold">Rol</th>
-                        <th className="text-left py-3 px-4 font-semibold">Departamento</th>
-                        <th className="text-left py-3 px-4 font-semibold">Fecha Creación</th>
-                        <th className="text-center py-3 px-4 font-semibold">Acciones</th>
+                        <th className="text-left py-2 px-4 font-semibold">Nombre</th>
+                        <th className="text-left py-2 px-4 font-semibold">Email</th>
+                        <th className="text-left py-2 px-4 font-semibold">Rol</th>
+                        <th className="text-left py-2 px-4 font-semibold">Departamento</th>
+                        <th className="text-left py-2 px-4 font-semibold">Fecha Creación</th>
+                        <th className="text-center py-2 px-4 font-semibold">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -251,28 +251,28 @@ export default function GestionPage() {
                           key={user.id}
                           className="border-b hover:bg-accent/50 transition-colors"
                         >
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <p className="font-medium">{user.name}</p>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <p className="text-sm text-muted-foreground">{user.email}</p>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleColor(
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(
                                 user.role
                               )}`}
                             >
                               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                             </span>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <p className="text-sm">{user.department}</p>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <p className="text-sm text-muted-foreground">{user.createdAt}</p>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 px-4">
                             <div className="flex justify-center">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -307,7 +307,7 @@ export default function GestionPage() {
 
                 {/* Paginación */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                  <div className="flex items-center justify-between mt-6 pt-2 border-t">
                     <p className="text-sm text-muted-foreground">
                       Página {currentPage} de {totalPages} • Mostrando{" "}
                       {paginatedUsers.length} de {filteredUsers.length} usuarios

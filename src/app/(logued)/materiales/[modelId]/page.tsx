@@ -1,12 +1,22 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Upload } from "lucide-react";
 import { MultimediaFileCard } from "@/components/MultimediaFileCard";
 import { MODELS } from "@/data/models";
 import { MULTIMEDIA_FILES, MultimediaFile } from "@/data/multimedia";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ModelMaterialesPage({
   params,
@@ -16,15 +26,65 @@ export default function ModelMaterialesPage({
   const model = MODELS.find((m) => m.id === modelId);
   const [files, setFiles] = useState<MultimediaFile[]>(MULTIMEDIA_FILES[modelId] || []);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleUpload = () => {
-    alert(
-      "Funcionalidad de subida simulada. En una implementación real, aquí se abriría un selector de archivos."
-    );
+    fileInputRef.current?.click();
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    let thumbnail = '';
+    
+    // Generate thumbnail for images/videos
+    if (file.type.startsWith('image/')) {
+      thumbnail = URL.createObjectURL(file);
+    } else if (file.type.startsWith('video/')) {
+      const video = document.createElement('video');
+      video.src = URL.createObjectURL(file);
+      video.currentTime = 1;
+      await new Promise((resolve) => {
+        video.onloadeddata = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 320;
+          canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+          thumbnail = canvas.toDataURL();
+          resolve(null);
+        };
+      });
+    }
+
+    const newFile: MultimediaFile = {
+      id: Date.now(),
+      name: file.name,
+      type: file.type.includes('image') ? 'image' : file.type.includes('video') ? 'video' : 'document',
+      url: URL.createObjectURL(file),
+      thumbnail,
+    };
+
+    setFiles(prev => [...prev, newFile]);
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<number | null>(null);
+
   const handleDelete = (fileId: number) => {
-    if (confirm("¿Estás seguro de que quieres eliminar este archivo?")) {
-      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+    setFileToDelete(fileId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (fileToDelete !== null) {
+      setFiles((prev) => prev.filter((f) => f.id !== fileToDelete));
+      setFileToDelete(null);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -48,6 +108,36 @@ export default function ModelMaterialesPage({
 
   return (
     <div className="min-h-screen bg-background p-8">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/*,video/*,.pdf,.doc,.docx"
+      />
+      
+      {/* Alert dialog eliminar */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar archivo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El archivo será eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>

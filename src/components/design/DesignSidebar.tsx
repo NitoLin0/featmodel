@@ -1,15 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Zap } from "lucide-react";
-import { connectionTypes, labels } from "./constants";
+import { connectionTypes, complejidadLabels, tipoLabels } from "./constants";
 
 interface DesignSidebarProps {
   selectedTool: string | null;
   setSelectedTool: React.Dispatch<React.SetStateAction<string | null>>;
   selectedConnection: string | null;
   setSelectedConnection: React.Dispatch<React.SetStateAction<string | null>>;
-  selectedLabel: string | null;
-  setSelectedLabel: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedComplejidad: string | null;
+  setSelectedComplejidad: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedTipo: string | null;
+  setSelectedTipo: React.Dispatch<React.SetStateAction<string | null>>;
   addNode: () => void;
 }
 
@@ -18,12 +20,14 @@ export function DesignSidebar({
   setSelectedTool,
   selectedConnection,
   setSelectedConnection,
-  selectedLabel,
-  setSelectedLabel,
+  selectedComplejidad,
+  setSelectedComplejidad,
+  selectedTipo,
+  setSelectedTipo,
   addNode,
 }: DesignSidebarProps) {
   return (
-    <div className="w-64 border-r bg-background/95 backdrop-blur-sm flex flex-col shadow-lg">
+    <div className="w-64 border-r bg-background/95 backdrop-blur-sm flex flex-col shadow-lg mb-12">
       <div className="px-4 py-3 border-b bg-linear-to-r from-blue-500/10 to-purple-500/10">
         <h2 className="text-lg font-semibold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Herramientas
@@ -97,20 +101,57 @@ export function DesignSidebar({
               <svg className="w-4 h-4 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M5 3a2 2 0 012-2h6a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V3z" />
               </svg>
-              Etiquetas
+              Complejidad
             </h3>
             <div className="space-y-2">
-              {labels.map((label) => (
+              {complejidadLabels.map((label) => (
                 <button
                   key={label.id}
-                  onClick={() => setSelectedLabel(label.id)}
+                  onClick={() => setSelectedComplejidad(label.id)}
                   className={`w-full flex items-center px-3 py-3 text-sm rounded-md transition-all duration-200 ${
-                    selectedLabel === label.id
+                    selectedComplejidad === label.id
                       ? "ring-2 ring-offset-2 ring-offset-background"
                       : "hover:scale-105"
                   }`}
                   style={{
-                    backgroundColor: selectedLabel === label.id ? `${label.color}20` : "transparent",
+                    backgroundColor: selectedComplejidad === label.id ? `${label.color}20` : "transparent",
+                  }}
+                >
+                  <Badge
+                    variant="outline"
+                    className="mr-2 text-sm font-medium"
+                    style={{
+                      borderColor: label.color,
+                      color: label.color,
+                      backgroundColor: `${label.color}15`,
+                    }}
+                  >
+                    {label.label}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          </div>
+          <Separator className="my-2" />
+          <div>
+            <h3 className="text-sm font-semibold mb-3 text-foreground flex items-center gap-2">
+              <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 110-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 01-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01 1 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1H11a1 1 0 110-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 011-2z" clipRule="evenodd" />
+              </svg>
+              Tipo
+            </h3>
+            <div className="space-y-2">
+              {tipoLabels.map((label) => (
+                <button
+                  key={label.id}
+                  onClick={() => setSelectedTipo(label.id)}
+                  className={`w-full flex items-center px-3 py-3 text-sm rounded-md transition-all duration-200 ${
+                    selectedTipo === label.id
+                      ? "ring-2 ring-offset-2 ring-offset-background"
+                      : "hover:scale-105"
+                  }`}
+                  style={{
+                    backgroundColor: selectedTipo === label.id ? `${label.color}20` : "transparent",
                   }}
                 >
                   <Badge

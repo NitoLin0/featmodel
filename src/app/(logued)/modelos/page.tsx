@@ -171,12 +171,24 @@ export default function ModelosPage() {
                       <p className="text-sm font-medium mb-2">
                         Colaboradores ({model.collaborators.length})
                       </p>
-                      <div className="space-y-1">
-                        {model.collaborators.map((collab) => (
-                          <p key={collab.id} className="text-xs text-muted-foreground">
-                            {collab.name}
-                          </p>
-                        ))}
+
+                      <div className="max-h-24 overflow-y-auto pr-2">
+                        <div className="space-y-1">
+                          {model.collaborators.slice(0, 2).map((collab) => (
+                            <p
+                              key={collab.id}
+                              className="text-xs text-muted-foreground"
+                            >
+                              {collab.name}
+                            </p>
+                          ))}
+
+                          {model.collaborators.length > 2 && (
+                            <p className="text-xs text-muted-foreground">
+                              ...y {model.collaborators.length - 2} colaboradores más
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
