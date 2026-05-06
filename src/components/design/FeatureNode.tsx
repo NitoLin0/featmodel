@@ -32,9 +32,13 @@ export function FeatureNode({
 
   const handleSave = () => {
     if (label.trim()) {
-      // Avoid mutating props directly; update via node data callback if provided
-      // Fallback to local mutation only if callback is not available.
-      data.label = label;
+      // Call the callback to update label in parent component
+      if (data.onLabelChange) {
+        data.onLabelChange(label);
+      } else {
+        // Fallback: mutate data directly (not ideal but for backward compatibility)
+        data.label = label;
+      }
     }
     setIsEditing(false);
   };

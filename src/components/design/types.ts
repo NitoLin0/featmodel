@@ -9,6 +9,7 @@ export interface FeatureNodeData {
   selectedConnection?: string;
   onDelete?: () => void;
   onTagChange?: (category: 'complejidad' | 'tipo', value: string) => void;
+  onLabelChange?: (newLabel: string) => void;
   onEdgeDelete?: (edgeId: string) => void;
   onEdgeUpdate?: (edgeId: string, newConnectionId: string) => void;
   getNodeLabel?: (nodeId: string) => string;

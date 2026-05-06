@@ -151,6 +151,22 @@ export default function DesignPage() {
             })
           );
         },
+        onLabelChange: (newLabel: string) => {
+          setNodes((nds) =>
+            nds.map((n: Node) => {
+              if (n.id === newNode.id) {
+                return {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    label: newLabel,
+                  },
+                };
+              }
+              return n;
+            })
+          );
+        },
         onEdgeDelete: handleEdgeDelete,
       },
     };
