@@ -12,7 +12,8 @@ import {
   connectionTypes,
   labels,
 } from "@/components/design";
-import { Node, Edge, useNodesState, useEdgesState } from "reactflow";
+import { Node, Edge, useNodesState, useEdgesState, addEdge } from "reactflow";
+import { generateNodeId, getRandomPosition, incrementVersion } from "@/lib/helpers";
 
 const nodeTypes = {
   feature: FeatureNode,
@@ -31,23 +32,23 @@ export default function DesignPage() {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
-  const [modelName, setModelName] = useState(modelId ? `Modelo ${modelId}` : "Modelo sin nombre");
+  const [modelName, setModelName] = useState(
+    modelId ? `Modelo ${modelId}` : "Modelo sin nombre"
+  );
   const [author, setAuthor] = useState("Usuario");
-  const [mode, setMode] = useState<"view" | "edit">(action === "edit" ? "edit" : "view");
+  const [mode, setMode] = useState<"view" | "edit">(
+    action === "edit" ? "edit" : "view"
+  );
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [newModelName, setNewModelName] = useState("");
   const [currentVersion, setCurrentVersion] = useState("v1.0");
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
 
-
+  // Actualizar modo cuando cambian los search params
   useEffect(() => {
-    console.log("Current nodes state:", nodes);
-  }, [nodes]);
-
-  useEffect(() => {
-    console.log("Current edges state:", edges);
-  }, [edges]);
+    setMode(action === "edit" ? "edit" : "view");
+  }, [action]);
 
   const onConnect = useCallback(
     (params: any) => {
@@ -55,7 +56,7 @@ export default function DesignPage() {
         ? connectionTypes.find((c) => c.id === selectedConnection)
         : connectionTypes[0];
       setEdges((eds: Edge[]) => {
-        const newEdges = require("reactflow").addEdge(
+        const newEdges = addEdge(
           {
             ...params,
             type: "smoothstep",
@@ -70,7 +71,6 @@ export default function DesignPage() {
           },
           eds
         );
-        console.log("Edges updated:", newEdges);
         return newEdges;
       });
     },
@@ -79,49 +79,39 @@ export default function DesignPage() {
 
   const addNode = useCallback(() => {
     const newNode: Node = {
-      id: `${nodes.length + 1}`,
+      id: generateNodeId(nodes.length),
       type: "feature",
-      position: {
-        x: Math.random() * 400 + 100,
-        y: Math.random() * 400 + 100,
-      },
+      position: getRandomPosition(),
       data: {
         label: `Característica ${nodes.length + 1}`,
         tag: selectedLabel
           ? labels.find((l) => l.id === selectedLabel)?.label
           : undefined,
+        edges: edges,
+        nodeId: undefined,
         onDelete: () => {
-          setNodes((nds) => {
-            const updatedNodes = nds.filter((n: Node) => n.id !== newNode.id);
-            console.log("Nodes updated after delete:", updatedNodes);
-            return updatedNodes;
-          });
-          setEdges((eds) => {
-            const updatedEdges = eds.filter(
-              (e: Edge) => e.source !== newNode.id && e.target !== newNode.id
-            );
-            console.log("Edges updated after delete:", updatedEdges);
-            return updatedEdges;
-          });
+          setNodes((nds) =>
+            nds.filter((n: Node) => n.id !== newNode.id)
+          );
+          setEdges((eds) =>
+            eds.filter(
+              (e: Edge) =>
+                e.source !== newNode.id && e.target !== newNode.id
+            )
+          );
         },
         onTagChange: (tag: string) => {
-          setNodes((nds) => {
-            const updatedNodes = nds.map((n: Node) =>
+          setNodes((nds) =>
+            nds.map((n: Node) =>
               n.id === newNode.id ? { ...n, data: { ...n.data, tag } } : n
-            );
-            console.log("Nodes updated after tag change:", updatedNodes);
-            return updatedNodes;
-          });
+            )
+          );
         },
         onEdgeDelete: handleEdgeDelete,
       },
     };
-    setNodes((nds: Node[]) => {
-      const updatedNodes = nds.concat(newNode);
-      console.log("Nodes updated after add:", updatedNodes);
-      return updatedNodes;
-    });
-  }, [nodes.length, selectedLabel, setNodes, setEdges]);
+    setNodes((nds: Node[]) => nds.concat(newNode));
+  }, [nodes.length, edges, selectedLabel, setNodes, setEdges]);
 
   const handleNewModel = () => {
     if (newModelName.trim()) {
@@ -135,31 +125,35 @@ export default function DesignPage() {
   };
 
   const handleSave = () => {
-    console.log("Guardando modelo:", { modelName, author, nodes, edges });
-    const versionParts = currentVersion.split(".");
-    const newVersion = `v${versionParts[0].substring(1)}.${Number.parseInt(versionParts[1]) + 1}`;
-    setCurrentVersion(newVersion);
+    setCurrentVersion(incrementVersion(currentVersion));
   };
 
   const handleLoad = () => {
-    console.log("Cargando modelo...");
+    // Placeholder para carga de modelo
   };
 
-const handleClear = () => {
+  const handleClear = () => {
     setNodes([...initialNodes]);
     setEdges([...initialEdges]);
   };
 
   const handleEdgeDelete = useCallback(
     (edgeId: string) => {
-      setEdges((eds: Edge[]) => {
-        const updatedEdges = eds.filter((e: Edge) => e.id !== edgeId);
-        console.log("Edge deleted:", edgeId, "Updated edges:", updatedEdges);
-        return updatedEdges;
-      });
+      setEdges((eds: Edge[]) =>
+        eds.filter((e: Edge) => e.id !== edgeId)
+      );
     },
     [setEdges]
   );
+
+  // Update nodes with edges data
+  const nodesWithEdges = nodes.map((node) => ({
+    ...node,
+    data: {
+      ...node.data,
+      edges: edges,
+    },
+  }));
 
   return (
     <SidebarProvider>
@@ -197,7 +191,7 @@ const handleClear = () => {
           />
           <DesignCanvas
             mode={mode}
-            nodes={nodes}
+            nodes={nodesWithEdges}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}

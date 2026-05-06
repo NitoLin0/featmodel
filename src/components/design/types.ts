@@ -6,6 +6,8 @@ export interface FeatureNodeData {
   onDelete?: () => void;
   onTagChange?: (tag: string) => void;
   onEdgeDelete?: (edgeId: string) => void;
+  edges?: Edge[];
+  nodeId?: string;
 }
 
 export interface DesignState {

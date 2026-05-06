@@ -12,6 +12,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { useTheme } from "next-themes";
 import { connectionTypes, labels } from "./constants";
+import { Zap } from "lucide-react";
 
 interface DesignCanvasProps {
   mode: "view" | "edit";
@@ -39,8 +40,16 @@ export function DesignCanvas({
   const { theme } = useTheme();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
+  const currentConnectionType = selectedConnection
+    ? connectionTypes.find((c) => c.id === selectedConnection)
+    : null;
+
+  const currentLabel = selectedLabel
+    ? labels.find((l) => l.id === selectedLabel)
+    : null;
+
   return (
-    <div className="flex-1" ref={reactFlowWrapper}>
+    <div className="flex-1 relative bg-linear-to-br from-transparent to-blue-50/10 dark:to-gray-900/10" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -63,23 +72,75 @@ export function DesignCanvas({
         />
         <Background gap={12} size={1} />
         <Panel position="top-left">
-          <div className="bg-background border rounded-lg p-2 shadow-sm">
-            <p className="text-sm font-medium">CuriConfig - Diseño</p>
-            <p className="text-xs text-muted-foreground">
-              {selectedConnection
-                ? `Conexión: ${
-                    connectionTypes.find((c) => c.id === selectedConnection)
-                      ?.label
-                  }`
-                : "Selecciona una conexion"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {selectedLabel
-                ? `Etiqueta: ${
-                    labels.find((l) => l.id === selectedLabel)?.label
-                  }`
-                : "Selecciona una etiqueta"}
-            </p>
+          <div className="bg-background/95 backdrop-blur-md border rounded-lg p-4 shadow-lg space-y-3 min-w-64 hover:shadow-xl transition-shadow">
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-foreground">CuriConfig - Diseño</p>
+              <p className="text-xs text-muted-foreground">
+                {mode === "edit" ? "Modo Edición" : "Modo Visualización"}
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-foreground">Conexión Activa:</p>
+                {currentConnectionType ? (
+                  <div className="flex items-center gap-2 px-2 py-1 bg-accent/50 rounded">
+                    <div
+                      className="w-3 h-0.5 rounded"
+                      style={{
+                        backgroundColor: currentConnectionType.color,
+                        borderStyle: currentConnectionType.style,
+                      }}
+                    />
+                    <span className="text-xs font-medium">
+                      {currentConnectionType.label}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    Selecciona una conexión
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-foreground">Etiqueta Activa:</p>
+                {currentLabel ? (
+                  <div className="flex items-center gap-2 px-2 py-1 rounded" style={{
+                    backgroundColor: `${currentLabel.color}20`,
+                    border: `1px solid ${currentLabel.color}`,
+                  }}>
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: currentLabel.color }}
+                    />
+                    <span className="text-xs font-medium" style={{ color: currentLabel.color }}>
+                      {currentLabel.label}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    Selecciona una etiqueta
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1 pt-2">
+                <p className="text-xs font-medium text-foreground">Estadísticas:</p>
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    {nodes.length} nodos
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M11.3 1.046A1 1 0 0010 2v5H5a1 1 0 00-.82 1.573l7 10A1 1 0 0013 17v-5h5a1 1 0 00.82-1.573l-7-10z" />
+                    </svg>
+                    {edges.length} conexiones
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </Panel>
       </ReactFlow>
